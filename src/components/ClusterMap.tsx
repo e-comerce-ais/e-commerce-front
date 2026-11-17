@@ -3,23 +3,20 @@ import { useMemo } from "react";
 import { CircleMarker, MapContainer, TileLayer, Tooltip } from "react-leaflet";
 import type { LatLngBoundsExpression } from "leaflet";
 import { useTheme } from "../hooks/useTheme";
-import type { Cluster, Metric } from "../types/cluster";
-import { binIndex, formatCompact, formatCurrency, formatCurrencyCompact, formatInt, metricLabel } from "../utils/format";
+import type { Cluster } from "../types/cluster";
+import { binIndex, formatCompact, formatDate, formatInt } from "../utils/format";
 
 interface Props {
   clusters: Cluster[];
-  metric: Metric;
   selected?: string;
   onSelect: (geohash: string) => void;
 }
 
-const valueOf = (c: Cluster, m: Metric) => (m === "orders" ? c.totalOrders : c.totalValue);
-
-export function ClusterMap({ clusters, metric, selected, onSelect }: Props) {
+export function ClusterMap({ clusters, selected, onSelect }: Props) {
   const theme = useTheme();
 
   const { min, max, bounds } = useMemo(() => {
-    const values = clusters.map((c) => valueOf(c, metric));
+    const counts = clusters.map((c) => c.count);
     const lats = clusters.map((c) => c.latitude);
     const lngs = clusters.map((c) => c.longitude);
     const b: LatLngBoundsExpression | undefined = clusters.length
@@ -28,10 +25,9 @@ export function ClusterMap({ clusters, metric, selected, onSelect }: Props) {
           [Math.max(...lats), Math.max(...lngs)],
         ]
       : undefined;
-    return { min: Math.min(...values), max: Math.max(...values), bounds: b };
-  }, [clusters, metric]);
+    return { min: Math.min(...counts), max: Math.max(...counts), bounds: b };
+  }, [clusters]);
 
-  const fmt = metric === "value" ? formatCurrencyCompact : formatCompact;
   const legend = theme.sequential.map((color, i) => ({
     color,
     from: min + ((max - min) * i) / 5,
@@ -42,7 +38,7 @@ export function ClusterMap({ clusters, metric, selected, onSelect }: Props) {
     <div className="card">
       <h2>Mapa dos clusters</h2>
       <p className="subtitle">
-        Cada círculo é um geohash. Tamanho e cor indicam {metricLabel[metric].toLowerCase()}.
+        Cada círculo é o centroide de um geohash. Tamanho e cor indicam a quantidade de pedidos.
       </p>
 
       <div className="map-wrap">
@@ -53,8 +49,7 @@ export function ClusterMap({ clusters, metric, selected, onSelect }: Props) {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             {clusters.map((c) => {
-              const v = valueOf(c, metric);
-              const ratio = max > 0 ? Math.sqrt(v / max) : 0; // área ∝ valor
+              const ratio = max > 0 ? Math.sqrt(c.count / max) : 0; // área ∝ pedidos
               const isSel = c.geohash === selected;
               return (
                 <CircleMarker
@@ -64,7 +59,7 @@ export function ClusterMap({ clusters, metric, selected, onSelect }: Props) {
                   pathOptions={{
                     color: isSel ? theme.textPrimary : theme.surface,
                     weight: isSel ? 3 : 2,
-                    fillColor: theme.sequential[binIndex(v, min, max)],
+                    fillColor: theme.sequential[binIndex(c.count, min, max)],
                     fillOpacity: 0.85,
                   }}
                   eventHandlers={{ click: () => onSelect(c.geohash) }}
@@ -72,9 +67,11 @@ export function ClusterMap({ clusters, metric, selected, onSelect }: Props) {
                   <Tooltip>
                     <strong>{c.geohash}</strong>
                     <br />
-                    Pedidos: {formatInt(c.totalOrders)}
+                    Pedidos: {formatInt(c.count)}
                     <br />
-                    Valor: {formatCurrency(c.totalValue)}
+                    Centroide: {c.latitude.toFixed(4)}, {c.longitude.toFixed(4)}
+                    <br />
+                    Atualizado: {formatDate(c.updatedAt)}
                   </Tooltip>
                 </CircleMarker>
               );
@@ -85,12 +82,12 @@ export function ClusterMap({ clusters, metric, selected, onSelect }: Props) {
         )}
       </div>
 
-      <div className="seq-legend" aria-label={`Legenda: ${metricLabel[metric]}`}>
-        <span className="legend-title">{metricLabel[metric]}</span>
+      <div className="seq-legend" aria-label="Legenda: pedidos">
+        <span className="legend-title">Pedidos</span>
         {legend.map((l) => (
           <span key={l.color} className="seq-legend-item">
             <span className="swatch" style={{ background: l.color }} />
-            {fmt(l.from)}–{fmt(l.to)}
+            {formatCompact(l.from)}–{formatCompact(l.to)}
           </span>
         ))}
       </div>

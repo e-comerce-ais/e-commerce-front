@@ -1,19 +1,17 @@
-const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
-const brlCompact = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-  notation: "compact",
-  maximumFractionDigits: 1,
-});
 const int = new Intl.NumberFormat("pt-BR");
 const compact = new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 });
+const dateTime = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" });
 
-export const formatCurrency = (v: number) => brl.format(v);
-export const formatCurrencyCompact = (v: number) => brlCompact.format(v);
 export const formatInt = (v: number) => int.format(Math.round(v));
 export const formatCompact = (v: number) => compact.format(v);
 
-export const metricLabel = { orders: "Pedidos", value: "Valor total" } as const;
+/** Aceita ISO 8601 ou epoch (segundos ou milissegundos), como string ou número. */
+export function formatDate(value?: string | null): string {
+  if (!value) return "—";
+  const n = Number(value);
+  const date = Number.isFinite(n) ? new Date(n < 1e12 ? n * 1000 : n) : new Date(value);
+  return Number.isNaN(date.getTime()) ? value : dateTime.format(date);
+}
 
 /** Divide [min, max] em 5 faixas iguais e devolve o índice 0..4 do valor. */
 export function binIndex(value: number, min: number, max: number): number {

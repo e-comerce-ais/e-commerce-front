@@ -100,3 +100,4 @@ tbody tr.selected { background: color-mix(in srgb, var(--accent) 18%, transparen
   color: var(--text-primary); background: color-mix(in srgb, var(--critical) 10%, transparent);
 }
 .alert::before { content: "⚠ "; color: var(--critical); }
+.updated { margin: 8px 0 0; font-size: 0.75rem; }

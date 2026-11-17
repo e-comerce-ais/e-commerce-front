@@ -2,10 +2,9 @@
 
 Dashboard em React + Vite + TypeScript que consome a API `api-geohash` (Lambda + API Gateway) e mostra os clusters de pedidos agrupados por geohash.
 
-- **Resumo**: total de clusters, de pedidos, valor total e ticket médio
-- **Mapa** (Leaflet + OpenStreetMap): um círculo por geohash, com tamanho e cor proporcionais à métrica escolhida
-- **Top N** (Recharts): ranking de clusters por pedidos ou por valor
-- **Dispersão**: pedidos × valor por cluster
+- **Resumo**: total de clusters, de pedidos, média por cluster, maior cluster e última atualização
+- **Mapa** (Leaflet + OpenStreetMap): um círculo no centroide de cada geohash (`sum_lat/count`, `sum_lng/count`), com tamanho e cor pela quantidade de pedidos
+- **Top N** (Recharts): ranking de clusters por quantidade de pedidos
 - **Tabela** ordenável. Clicar em um cluster destaca ele em todos os gráficos.
 
 ## Rodando localmente
@@ -24,7 +23,7 @@ npm run dev                    # http://localhost:5173
 src/
 ├── api/client.ts          # fetch tipado para a API
 ├── hooks/                 # useClusters / useSummary (React Query), useTheme
-├── components/            # SummaryCards, ClusterMap, ClusterBarChart, ClusterScatter, ClusterTable
+├── components/            # SummaryCards, ClusterMap, ClusterBarChart, ClusterTable
 ├── pages/Dashboard.tsx    # filtros + layout
 ├── utils/                 # formatação pt-BR, tokens de cor (claro/escuro)
 └── types/cluster.ts       # mesmo formato da API

@@ -1,4 +1,4 @@
-import type { ApiResponse, Cluster, ClustersSummary, Metric } from "../types/cluster";
+import type { ApiResponse, Cluster, ClustersSummary } from "../types/cluster";
 
 const BASE_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 
@@ -24,8 +24,7 @@ async function get<T>(path: string): Promise<ApiResponse<T>> {
 }
 
 export const api = {
-  listClusters: (sort: Metric = "orders") =>
-    get<Cluster[]>(`/clusters?sort=${sort}`).then((r) => r.data),
+  listClusters: () => get<Cluster[]>("/clusters").then((r) => r.data),
   getCluster: (geohash: string) =>
     get<Cluster>(`/clusters/${encodeURIComponent(geohash)}`).then((r) => r.data),
   getSummary: () => get<ClustersSummary>("/clusters/summary").then((r) => r.data),

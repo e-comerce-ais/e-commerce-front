@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { Cluster } from "../types/cluster";
-import { formatCurrency, formatInt } from "../utils/format";
+import { formatDate, formatInt } from "../utils/format";
 
-type SortKey = "geohash" | "totalOrders" | "totalValue" | "ticket";
+type SortKey = "geohash" | "count" | "updatedAt";
 
 interface Props {
   clusters: Cluster[];
@@ -10,16 +10,13 @@ interface Props {
   onSelect: (geohash: string) => void;
 }
 
-const ticket = (c: Cluster) => (c.totalOrders ? c.totalValue / c.totalOrders : 0);
-
 export function ClusterTable({ clusters, selected, onSelect }: Props) {
-  const [sortKey, setSortKey] = useState<SortKey>("totalOrders");
+  const [sortKey, setSortKey] = useState<SortKey>("count");
   const [asc, setAsc] = useState(false);
 
   const rows = [...clusters].sort((a, b) => {
-    const va = sortKey === "ticket" ? ticket(a) : a[sortKey];
-    const vb = sortKey === "ticket" ? ticket(b) : b[sortKey];
-    const cmp = typeof va === "string" ? va.localeCompare(vb as string) : (va as number) - (vb as number);
+    const cmp =
+      sortKey === "count" ? a.count - b.count : String(a[sortKey] ?? "").localeCompare(String(b[sortKey] ?? ""));
     return asc ? cmp : -cmp;
   });
 
@@ -30,7 +27,7 @@ export function ClusterTable({ clusters, selected, onSelect }: Props) {
     >
       <button
         type="button"
-        onClick={() => (sortKey === key ? setAsc(!asc) : (setSortKey(key), setAsc(false)))}
+        onClick={() => (sortKey === key ? setAsc(!asc) : (setSortKey(key), setAsc(key === "geohash")))}
       >
         {label} {sortKey === key ? (asc ? "▲" : "▼") : ""}
       </button>
@@ -45,10 +42,9 @@ export function ClusterTable({ clusters, selected, onSelect }: Props) {
           <thead>
             <tr>
               {header("geohash", "Geohash", false)}
-              <th className="num">Lat / Lng</th>
-              {header("totalOrders", "Pedidos")}
-              {header("totalValue", "Valor total")}
-              {header("ticket", "Ticket médio")}
+              <th className="num">Centroide (lat, lng)</th>
+              {header("count", "Pedidos")}
+              {header("updatedAt", "Atualizado em")}
             </tr>
           </thead>
           <tbody>
@@ -62,9 +58,8 @@ export function ClusterTable({ clusters, selected, onSelect }: Props) {
                 <td className="num">
                   {c.latitude.toFixed(4)}, {c.longitude.toFixed(4)}
                 </td>
-                <td className="num">{formatInt(c.totalOrders)}</td>
-                <td className="num">{formatCurrency(c.totalValue)}</td>
-                <td className="num">{formatCurrency(ticket(c))}</td>
+                <td className="num">{formatInt(c.count)}</td>
+                <td className="num">{formatDate(c.updatedAt)}</td>
               </tr>
             ))}
           </tbody>
