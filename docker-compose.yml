@@ -1,0 +1,15 @@
+# Uso (na pasta do projeto, ex.: no EC2 depois do git pull):
+#   echo "VITE_API_URL=https://<api-id>.execute-api.<regiao>.amazonaws.com" > .env
+#   docker compose up -d --build
+services:
+  web:
+    build:
+      context: .
+      args:
+        # O Vite embute a URL no bundle: mudou a URL, rode o up com --build de novo.
+        VITE_API_URL: ${VITE_API_URL:?defina VITE_API_URL no arquivo .env}
+    image: e-commerce-front
+    container_name: e-commerce-front
+    ports:
+      - "80:80"
+    restart: unless-stopped

@@ -29,6 +29,7 @@ src/
 └── types/cluster.ts       # mesmo formato da API
 deploy/                    # nginx.conf + scripts de deploy (com e sem Docker)
 Dockerfile                 # build com Node, serve com Nginx
+docker-compose.yml         # sobe o container na porta 80 lendo a URL da API do .env
 ```
 
 ## Docker
@@ -42,7 +43,22 @@ docker run -d --name e-commerce-front -p 8080:80 e-commerce-front   # http://loc
 
 Mudou a URL da API? É preciso buildar a imagem de novo.
 
-## Deploy no EC2 (Docker)
+## Deploy no EC2 com git + Docker Compose (build na instância)
+
+Com Docker e o plugin Compose instalados no EC2 (no Ubuntu: `sudo apt install docker.io docker-compose-v2`) e o repositório clonado:
+
+```bash
+cd e-commerce-front
+git pull
+echo "VITE_API_URL=https://<api-id>.execute-api.<regiao>.amazonaws.com" > .env   # só na primeira vez
+docker compose up -d --build
+```
+
+O container sobe na porta **80** com `restart: unless-stopped`. O `.env` fica só no servidor (está no `.gitignore`); sem ele o compose para com a mensagem `defina VITE_API_URL no arquivo .env`. Se der `permission denied` no socket do Docker, use `sudo docker compose ...`. Se a porta 80 estiver ocupada, desligue o Nginx/Apache da instância (`sudo systemctl disable --now nginx`).
+
+Comandos úteis: `docker compose ps`, `docker compose logs -f`, `docker compose down`.
+
+## Deploy no EC2 buildando na sua máquina (sem git no EC2)
 
 ### 1. Criar a instância (console AWS)
 - AMI **Amazon Linux 2023**, tipo `t3.micro`, com um key pair (`.pem`).
