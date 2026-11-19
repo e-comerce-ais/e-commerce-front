@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+*.log
+*.tsbuildinfo
+
+# Segredos e configs locais: a URL da API entra por --build-arg
+.env
+.env.*
+*.pem
+
+Dockerfile
+.dockerignore
+deploy/*.sh
