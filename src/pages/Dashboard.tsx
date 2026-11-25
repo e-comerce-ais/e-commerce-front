@@ -13,7 +13,8 @@ export function Dashboard() {
   const [selected, setSelected] = useState<string>();
 
   const toggleSelect = (g: string) => setSelected((cur) => (cur === g ? undefined : g));
-  const data = (clusters.data ?? []).filter((c) => c.count >= minCount);
+  // Se a última busca falhou, não mostra os dados antigos que o React Query guardou.
+  const data = clusters.isError ? [] : (clusters.data ?? []).filter((c) => c.count >= minCount);
 
   return (
     <main className="page">
@@ -71,7 +72,7 @@ export function Dashboard() {
         </div>
       )}
 
-      <SummaryCards summary={summary.data} loading={summary.isLoading} />
+      <SummaryCards summary={summary.isError ? undefined : summary.data} loading={summary.isLoading} />
 
       {clusters.isLoading ? (
         <div className="card empty">Carregando clusters…</div>
