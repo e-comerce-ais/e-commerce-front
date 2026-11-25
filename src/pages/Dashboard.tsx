@@ -29,9 +29,11 @@ export function Dashboard() {
             clusters.refetch();
             summary.refetch();
           }}
-          disabled={clusters.isFetching}
+          // Com o polling de 2s, isFetching liga e desliga o tempo todo;
+          // por isso o botão só fica desativado na primeira carga.
+          disabled={clusters.isLoading}
         >
-          {clusters.isFetching ? "Atualizando…" : "Atualizar"}
+          {clusters.isLoading ? "Carregando…" : "Atualizar"}
         </button>
       </header>
 
