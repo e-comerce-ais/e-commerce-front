@@ -14,7 +14,8 @@ export class ApiError extends Error {
 async function get<T>(path: string): Promise<ApiResponse<T>> {
   if (!BASE_URL) throw new ApiError(0, "VITE_API_URL não configurada (veja .env.example)");
 
-  const res = await fetch(`${BASE_URL}${path}`);
+  // "no-store": o navegador não reaproveita respostas antigas, sempre pede à API.
+  const res = await fetch(`${BASE_URL}${path}`, { cache: "no-store" });
   const json = await res.json().catch(() => null);
 
   if (!res.ok) {
