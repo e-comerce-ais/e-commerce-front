@@ -2,6 +2,8 @@
  * Tokens de cor para os gráficos. Recharts e Leaflet recebem cor por
  * atributo SVG/JS (onde var(--x) não funciona), então ficam aqui em JS.
  * Os mesmos valores existem como CSS vars em index.css para o resto da UI.
+ *
+ * O dashboard usa um visual único, escuro ("radar"), independente do tema do sistema.
  */
 export interface Theme {
   surface: string;
@@ -11,28 +13,17 @@ export interface Theme {
   grid: string;
   axis: string;
   series: string;
-  /** Escala sequencial colorida, 5 faixas: menor → maior magnitude (ciano → laranja). */
+  /** Escala de calor, 5 faixas: menor → maior quantidade de pedidos. */
   sequential: [string, string, string, string, string];
 }
 
-export const lightTheme: Theme = {
-  surface: "#ffffff",
-  textPrimary: "#0f172a",
-  textSecondary: "#475569",
-  muted: "#94a3b8",
-  grid: "#e7eaf1",
-  axis: "#cbd5e1",
-  series: "#2563eb",
-  sequential: ["#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899", "#f97316"],
-};
-
-export const darkTheme: Theme = {
-  surface: "#121a2e",
-  textPrimary: "#e8ecf5",
-  textSecondary: "#a3adc2",
-  muted: "#6b7591",
-  grid: "#232d45",
-  axis: "#2e3a56",
-  series: "#5b8def",
-  sequential: ["#22d3ee", "#60a5fa", "#a78bfa", "#f472b6", "#fb923c"],
+export const theme: Theme = {
+  surface: "#0e1424",
+  textPrimary: "#eef2ff",
+  textSecondary: "#a5b0cc",
+  muted: "#6b7697",
+  grid: "#1e2740",
+  axis: "#2a3557",
+  series: "#c6f432",
+  sequential: ["#38bdf8", "#34d399", "#c6f432", "#fb923c", "#f43f5e"],
 };
