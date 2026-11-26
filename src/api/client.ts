@@ -15,7 +15,14 @@ async function get<T>(path: string): Promise<ApiResponse<T>> {
   if (!BASE_URL) throw new ApiError(0, "VITE_API_URL não configurada (veja .env.example)");
 
   // "no-store": o navegador não reaproveita respostas antigas, sempre pede à API.
-  const res = await fetch(`${BASE_URL}${path}`, { cache: "no-store" });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, { cache: "no-store" });
+  } catch {
+    // O navegador só dá "Failed to fetch" quando não consegue ler a resposta:
+    // API fora do ar, URL errada ou Lambda quebrando antes de responder (sem headers de CORS).
+    throw new ApiError(0, "Não foi possível conectar à API. Confira a VITE_API_URL e os logs da Lambda no CloudWatch.");
+  }
   const json = await res.json().catch(() => null);
 
   if (!res.ok) {

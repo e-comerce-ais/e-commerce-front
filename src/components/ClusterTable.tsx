@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Cluster } from "../types/cluster";
 import { formatDate, formatInt } from "../utils/format";
+import { IconTable } from "./Icons";
 
 type SortKey = "geohash" | "count" | "updatedAt";
 
@@ -19,6 +20,9 @@ export function ClusterTable({ clusters, selected, onSelect }: Props) {
       sortKey === "count" ? a.count - b.count : String(a[sortKey] ?? "").localeCompare(String(b[sortKey] ?? ""));
     return asc ? cmp : -cmp;
   });
+  // Posição no ranking por pedidos, independente da ordenação escolhida.
+  const rankOf = new Map([...clusters].sort((a, b) => b.count - a.count).map((c, i) => [c.geohash, i + 1]));
+  const max = Math.max(1, ...clusters.map((c) => c.count));
 
   const header = (key: SortKey, label: string, numeric = true) => (
     <th
@@ -36,7 +40,18 @@ export function ClusterTable({ clusters, selected, onSelect }: Props) {
 
   return (
     <div className="card">
-      <h2>Tabela de clusters</h2>
+      <div className="card-header">
+        <div className="card-title">
+          <span className="card-icon">
+            <IconTable />
+          </span>
+          <div>
+            <h2>Tabela de clusters</h2>
+            <p className="subtitle">Clique no cabeçalho para ordenar e numa linha para destacar.</p>
+          </div>
+        </div>
+        <span className="badge">{formatInt(clusters.length)} clusters</span>
+      </div>
       <div className="table-wrap">
         <table>
           <thead>
@@ -54,14 +69,33 @@ export function ClusterTable({ clusters, selected, onSelect }: Props) {
                 className={c.geohash === selected ? "selected" : undefined}
                 onClick={() => onSelect(c.geohash)}
               >
-                <td className="mono">{c.geohash}</td>
-                <td className="num">
+                <td>
+                  <span className="geo mono">
+                    <span className={`rank rank-${rankOf.get(c.geohash)}`}>{rankOf.get(c.geohash)}</span>
+                    {c.geohash}
+                  </span>
+                </td>
+                <td className="num muted">
                   {c.latitude.toFixed(4)}, {c.longitude.toFixed(4)}
                 </td>
-                <td className="num">{formatInt(c.count)}</td>
-                <td className="num">{formatDate(c.updatedAt)}</td>
+                <td className="num">
+                  <span className="count-cell">
+                    <span className="count-bar" aria-hidden="true">
+                      <span style={{ width: `${(c.count / max) * 100}%` }} />
+                    </span>
+                    <strong>{formatInt(c.count)}</strong>
+                  </span>
+                </td>
+                <td className="num muted">{formatDate(c.updatedAt)}</td>
               </tr>
             ))}
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={4} className="muted" style={{ textAlign: "center", padding: 32 }}>
+                  Nenhum cluster para exibir ainda.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

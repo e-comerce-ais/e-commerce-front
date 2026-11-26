@@ -5,6 +5,7 @@ import type { LatLngBoundsExpression } from "leaflet";
 import { useTheme } from "../hooks/useTheme";
 import type { Cluster } from "../types/cluster";
 import { binIndex, formatCompact, formatDate, formatInt } from "../utils/format";
+import { IconMap } from "./Icons";
 
 interface Props {
   clusters: Cluster[];
@@ -36,17 +37,27 @@ export function ClusterMap({ clusters, selected, onSelect }: Props) {
 
   return (
     <div className="card">
-      <h2>Mapa dos clusters</h2>
-      <p className="subtitle">
-        Cada círculo é o centroide de um geohash. Tamanho e cor indicam a quantidade de pedidos.
-      </p>
+      <div className="card-header">
+        <div className="card-title">
+          <span className="card-icon">
+            <IconMap />
+          </span>
+          <div>
+            <h2>Mapa dos clusters</h2>
+            <p className="subtitle">
+              Cada círculo é o centroide de um geohash. Tamanho e cor indicam a quantidade de pedidos.
+            </p>
+          </div>
+        </div>
+        <span className="badge">{formatInt(clusters.length)} no mapa</span>
+      </div>
 
       <div className="map-wrap">
         {bounds ? (
           <MapContainer bounds={bounds} boundsOptions={{ padding: [24, 24] }} scrollWheelZoom className="map">
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             />
             {clusters.map((c) => {
               const ratio = max > 0 ? Math.sqrt(c.count / max) : 0; // área ∝ pedidos
@@ -57,10 +68,10 @@ export function ClusterMap({ clusters, selected, onSelect }: Props) {
                   center={[c.latitude, c.longitude]}
                   radius={6 + ratio * 22}
                   pathOptions={{
-                    color: isSel ? theme.textPrimary : theme.surface,
-                    weight: isSel ? 3 : 2,
+                    color: isSel ? theme.textPrimary : "#ffffff",
+                    weight: isSel ? 3 : 1.5,
                     fillColor: theme.sequential[binIndex(c.count, min, max)],
-                    fillOpacity: 0.85,
+                    fillOpacity: selected && !isSel ? 0.45 : 0.85,
                   }}
                   eventHandlers={{ click: () => onSelect(c.geohash) }}
                 >
@@ -78,19 +89,24 @@ export function ClusterMap({ clusters, selected, onSelect }: Props) {
             })}
           </MapContainer>
         ) : (
-          <div className="empty">Nenhum cluster para exibir.</div>
+          <div className="empty">
+            <IconMap size={28} />
+            Nenhum cluster para exibir ainda.
+          </div>
         )}
       </div>
 
-      <div className="seq-legend" aria-label="Legenda: pedidos">
-        <span className="legend-title">Pedidos</span>
-        {legend.map((l) => (
-          <span key={l.color} className="seq-legend-item">
-            <span className="swatch" style={{ background: l.color }} />
-            {formatCompact(l.from)}–{formatCompact(l.to)}
-          </span>
-        ))}
-      </div>
+      {clusters.length > 0 && (
+        <div className="seq-legend" aria-label="Legenda: pedidos">
+          <span className="legend-title">Pedidos</span>
+          {legend.map((l) => (
+            <span key={l.color} className="seq-legend-item">
+              <span className="swatch" style={{ background: l.color }} />
+              {formatCompact(l.from)}–{formatCompact(l.to)}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
