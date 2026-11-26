@@ -11,29 +11,28 @@ export interface Theme {
   grid: string;
   axis: string;
   series: string;
-  /** Escala sequencial azul, 5 faixas: menor → maior magnitude. */
+  /** Escala sequencial colorida, 5 faixas: menor → maior magnitude (ciano → laranja). */
   sequential: [string, string, string, string, string];
 }
 
 export const lightTheme: Theme = {
-  surface: "#fcfcfb",
-  textPrimary: "#0b0b0b",
-  textSecondary: "#52514e",
-  muted: "#898781",
-  grid: "#e1e0d9",
-  axis: "#c3c2b7",
-  series: "#2a78d6",
-  sequential: ["#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#104281"],
+  surface: "#ffffff",
+  textPrimary: "#0f172a",
+  textSecondary: "#475569",
+  muted: "#94a3b8",
+  grid: "#e7eaf1",
+  axis: "#cbd5e1",
+  series: "#2563eb",
+  sequential: ["#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899", "#f97316"],
 };
 
 export const darkTheme: Theme = {
-  surface: "#1a1a19",
-  textPrimary: "#f0efec",
-  textSecondary: "#c3c2b7",
-  muted: "#898781",
-  grid: "#2c2c2a",
-  axis: "#383835",
-  series: "#3987e5",
-  // No escuro, magnitude baixa recua para o fundo (mais escuro) e a alta clareia.
-  sequential: ["#184f95", "#256abf", "#3987e5", "#6da7ec", "#9ec5f4"],
+  surface: "#121a2e",
+  textPrimary: "#e8ecf5",
+  textSecondary: "#a3adc2",
+  muted: "#6b7591",
+  grid: "#232d45",
+  axis: "#2e3a56",
+  series: "#5b8def",
+  sequential: ["#22d3ee", "#60a5fa", "#a78bfa", "#f472b6", "#fb923c"],
 };
